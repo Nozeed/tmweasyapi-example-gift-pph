@@ -16,32 +16,13 @@ $database_check = array(
 	"5" => "sqlsrv_connect"
 );
 
-if (!function_exists($database_check[$database_type])) {
-	//die ('<h1>PHP ของคุณไม่รองรับ การเชื่อมฐานข้อมูลแบบ '.$database_check[$database_type].' ต้องเปิดส่วนเสริมของ PHP ให้รองรับ หรือเปลี่ยนการเชื่อมต่อแบบอื่น ที่ไฟล์ Config.php ตัวแปล $database_type </h1>');
+// Direct PDO connection
+try {
+	$conn = new PDO("mysql:host=$database_host;dbname=$database_db_name;charset=utf8mb4", $database_user, $database_password);
+	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+	die("Error PDO Database is not connect: " . $e->getMessage());
 }
-$connectionInfo = array("Database" => $database_db_name, "UID" => $database_user, "PWD" => $database_password);
-$connect_db = array(
-	'1' => '$conn=mysql_connect($database_host,$database_user,$database_password) or die("connect Mysql database error!");
-	mysql_select_db($database_db_name) or die("Select database error!");',
-
-	'2' => '$conn=mysqli_connect($database_host,$database_user,$database_password,$database_db_name) or die("Error Mysqli Database is not connect!");',
-
-	'3' => 'mssql_connect($database_host,$database_user,$database_password) or die("Mssql Database not Connect.. Please Check config");
-	mssql_select_db ($database_db_name) or die("Mssql Select database error!");',
-
-	'4' => '$conn=odbc_connect(\'Driver={SQL Server};Server=\' .$database_host. \';Database=\' . $database_db_name. \';\' ,$database_user, $database_password) or die(\'Error Odbc Mssql Database is not connect!\');',
-	'5' => '$conn=sqlsrv_connect($database_host,$connectionInfo) or die("sqlsrv_connect to Mssql server Error ตรวจสอบการตั้งค่า Database");',
-	'6' => '
-	try{
-		$conn = new PDO("sqlsrv:server=$database_host;Database=$database_db_name", $database_user, $database_password);
-	}catch (PDOException $e) {
-		die(\'Error PDO Sqlsrv Database is not connect!\');
-	}
-				',
-);
-
-
-eval($connect_db[$database_type]);
 
 
 if ($_GET["action"] == "cancel") {
