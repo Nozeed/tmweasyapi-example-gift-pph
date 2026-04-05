@@ -25,27 +25,6 @@ PDO prepared statement
 
 ### 1. TrueWallet Gift API (Api-TrueWallet-Gift)
 วัตถุประสงค์: ใช้สำหรับเติมเงินบัตรของขวัญ TrueWallet (Gift) ให้กับเบอร์โทรศัพท์
-ขั้นตอนการทำงานหลัก:
 
-ส่งคำขอเติมเงิน (topup) พร้อมเบอร์โทร + มูลค่าบัตร
-ระบบจะคืน transaction_id หรือ ref_id
-ตรวจสอบสถานะธุรกรรม (check status) เพื่อยืนยันว่าสำเร็จหรือไม่
-
-#### ฟังก์ชันหลัก:
-```php
-topupGift($phone, $amount, $note = '')
-checkStatus($transaction_id)
-```
 ### 2. PromptPay API (API-PromptPay)
 วัตถุประสงค์: ใช้สำหรับโอนเงินผ่าน PromptPay (พร้อมเพย์) โดยไม่ต้องกรอกเลขบัญชี
-ขั้นตอนการทำงานหลัก:
-
-ส่งคำขอโอนเงินด้วยเบอร์โทรศัพท์ / บัตรประชาชน / e-Wallet
-ระบบจะคืนผลลัพธ์ทันทีหรือแบบ Async
-ตรวจสอบสถานะการโอน (check status)
-
-#### ฟังก์ชันหลัก:
-```php
-transferPromptPay($target, $amount, $note = '')
-checkTransferStatus($ref_id)
-```
