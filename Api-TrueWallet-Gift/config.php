@@ -1,7 +1,6 @@
 <?php
 
 $url_api = "https://tmwallet.thaighost.net/apiwallet.php"; // URL API TrueWallet gift
-
 $tmweasy["user"] = ""; //Username ใช้ล็อกอินเว็บ https://www.tmweasyapi.com/login.php
 $tmweasy["password"] = ""; //Password ใช้ล็อกอินเว็บ https://www.tmweasyapi.com/login.php
 $truewallet["mobile"] = ""; //เบอร์ทรูวอเลท ตัวเลขเท่านั้น
