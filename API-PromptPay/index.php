@@ -6,7 +6,7 @@ set_time_limit(0);
 error_reporting(0);
 include("function.php");
 
-$config = @include("config.php");
+$config = file_exists("config.php") ? include("config.php") : [];
 
 $database_check = array(
 	"1" => "mysql_connect",
