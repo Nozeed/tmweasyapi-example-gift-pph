@@ -57,19 +57,13 @@ $database_table = $database_set['user_table'];
 $database_user_field = $database_set['user_field'];
 $database_point_field = $database_set['point_field'];
 
-$connectionInfo = array("Database" => $database_db_name, "UID" => $database_user, "PWD" => $database_password);
-
-$connect_db = array(
-    '1' => '$conn=mysql_connect($database_host,$database_user,$database_password) or die("connect Mysql database error! ตรวจสอบการตั้งค่า Database");
-    mysql_select_db($database_db_name) or die("Select database error! ตรวจสอบการตั้งค่า Database");',
-    '2' => '$conn=mysqli_connect($database_host,$database_user,$database_password,$database_db_name) or die("Error Mysqli Database is not connect! ตรวจสอบการตั้งค่า Database");',
-    '3' => 'mssql_connect($database_host,$database_user,$database_password) or die("Mssql Database not Connect.. ตรวจสอบการตั้งค่า Database");
-    mssql_select_db ($database_db_name) or die("Mssql Select database error!");',
-    '4' => '$conn=odbc_connect(\'Driver={SQL Server};Server=\' .$database_host. \';Database=\' . $database_db_name. \';\' ,$database_user, $database_password) or die(\'Error Odbc Mssql Database is not connect!\');',
-    '5' => '$conn=sqlsrv_connect($database_host,$connectionInfo) or die("sqlsrv_connect to Mssql server Error ตรวจสอบการตั้งค่า Database");',
-);
-
-eval($connect_db[$database_set['database_type']]);
+// Direct PDO connection
+try {
+    $conn = new PDO("mysql:host=$database_host;dbname=$database_db_name;charset=utf8mb4", $database_user, $database_password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Error PDO Database is not connect! ตรวจสอบการตั้งค่า Database: " . $e->getMessage());
+}
 
 $tran_id = false;
 if (@$_POST['transactionid']) {
@@ -97,14 +91,11 @@ if (@$_POST['transactionid']) {
             }
 
             $ref1 = $_POST['ref1'];
-            $database_update = array(
-                '1' => 'mysql_query("update $database_table set $database_point_field = $database_point_field + $point where $database_user_field = \'$ref1\' ");',
-                '2' => 'mysqli_query($conn,"update $database_table set $database_point_field = $database_point_field + $point where $database_user_field = \'$ref1\' ");',
-                '3' => 'mssql_query("update $database_table set $database_point_field = $database_point_field + $point where $database_user_field = \'$ref1\' ");',
-                '4' => 'odbc_exec($conn,"update $database_table set $database_point_field = $database_point_field + $point where $database_user_field = \'$ref1\' ");',
-                '5' => 'sqlsrv_query($conn,"update $database_table set $database_point_field = $database_point_field + $point where $database_user_field = \'$ref1\' ");',
-            );
-            eval($database_update[$database_set['database_type']]);
+            // Direct PDO prepared statement
+            $stmt = $conn->prepare("update $database_table set $database_point_field = $database_point_field + :point where $database_user_field = :ref1");
+            $stmt->bindParam(":point", $point);
+            $stmt->bindParam(":ref1", $ref1);
+            $stmt->execute();
 
             $_SESSION["alert_content"] = "จำนวนเงิน คือ " . number_format($money_total) . " บาท ได้รับ  " . number_format($point) . " เครดิตร \n ขอบคุณที่ใช้บริการครับ   [ ปิดหน้านี้ได้เลย! ]";
             $_SESSION["alert_type"] = "alert-success";
