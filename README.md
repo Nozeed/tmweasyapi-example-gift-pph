@@ -6,10 +6,8 @@
 
 โครงการนี้เป็นตัวอย่างโค้ด PHP แสดงวิธีเรียกใช้งานทั้ง 2 API อย่างง่ายและสะดวก
 
-## โครงสร้างโฟลเดอร์
-├── Api-TrueWallet-Gift/     # โค้ดตัวอย่าง API TrueWallet Gift
-├── API-PromptPay/          # โค้ดตัวอย่าง API PromptPay
-└── README.md
+## PDO
+PDO prepared statement
 
 ## คุณสมบัติ
 
