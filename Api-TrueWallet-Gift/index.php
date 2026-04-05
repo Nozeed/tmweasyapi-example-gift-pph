@@ -48,7 +48,7 @@ function tf($content)
     }
 }
 
-$config = @include("config.php");
+$config = file_exists("config.php") ? include("config.php") : [];
 $database_host = $database_set['host'];
 $database_user = $database_set['user'];
 $database_password = $database_set['password'];
@@ -66,16 +66,14 @@ try {
 }
 
 $tran_id = false;
-if (@$_POST['transactionid']) {
-    switch ($_POST['transactionid']) {
-        case "truegift":
-            if (strpos($_POST["gifturl"], "ttp")) {
-                $tran_id = trim($_POST["gifturl"]);
-            } else {
-                $_SESSION["alert_content"] = "Error : การกรอก Url ไม่ถูกต้อง";
-                $_SESSION["alert_type"] = "alert-danger";
-            }
-            break;
+if (!empty($_POST['transactionid'])) {
+    if ($_POST['transactionid'] == "truegift") {
+        if (strpos($_POST["gifturl"], "ttp")) {
+            $tran_id = trim($_POST["gifturl"]);
+        } else {
+            $_SESSION["alert_content"] = "Error : การกรอก Url ไม่ถูกต้อง";
+            $_SESSION["alert_type"] = "alert-danger";
+        }
     }
 
     if ($tran_id) {
