@@ -2,12 +2,12 @@
 $api_url = "https://tmwallet.thaighost.net/api_pph.php";
 $tmweasy_user = ""; //Username ใช้ล็อกอินเว็บ https://www.tmweasyapi.com/login.php
 $tmweasy_password = ""; //Password ใช้ล็อกอินเว็บ https://www.tmweasyapi.com/login.php
-$tmweasy_api_key = "";
+$tmweasy_api_key = ""; //api key ที่ได้จากการเปิดใช้งาน Qr Promptpay Api บนเว็บ  tmweasy
 
 $con_id = ""; //conid ที่ได้จากการเปิดใช้งาน Qr Promptpay Api บนเว็บ  tmweasy
 $prommpay_no = "";  //เลข ID พร้อมเพย์ ใส่เฉพาะตัวเลขเช่น เบอร์โทร เลขบัตร ปชช 
-$prommpay_type = "01"; //ประเพทพร้อมเพย์  01 = Mobile
-$prommpay_name = ""; //ชื่อบัญชี
+$prommpay_type = "01"; //ประเพทพร้อมเพย์  01 = Mobile, 02 = เลขบัตร ปชช, 03 = E-Wallet
+$prommpay_name = ""; //ชื่อและนามสกุล
 
 //--------------- การเชื่อม ฐานข้อมูล เพื่ออัพเดทเครดิตรให้ลูกค้า----------------
 $database_host = "localhost";
