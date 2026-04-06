@@ -77,7 +77,7 @@ if (!empty($_POST['transactionid'])) {
     }
 
     if ($tran_id) {
-        $send_api = connect_api($url_api . "?username=" . $tmweasy['user'] . "&password=" . $tmweasy['password'] . "&tmemail=" . $truewallet["mobile"] . "&transactionid=" . $tran_id . "&clientip=" . urlencode(my_ip()) . "&ref1=" . $_POST['ref1'] . "&action=yes&json=1");
+        $send_api = connect_api($api_url . "?username=" . $tmweasy['user'] . "&password=" . $tmweasy['password'] . "&tmemail=" . $truewallet["mobile"] . "&transactionid=" . $tran_id . "&clientip=" . urlencode(my_ip()) . "&ref1=" . $_POST['ref1'] . "&action=yes&json=1");
         $api_respone = json_decode($send_api, true);
 
         if ($api_respone['Status'] == "check_success") {
@@ -100,7 +100,7 @@ if (!empty($_POST['transactionid'])) {
         }
     }
 } else {
-    $check_api = connect_api($url_api . "?username=" . $tmweasy['user'] . "&password=" . $tmweasy['password'] . "&json=1");
+    $check_api = connect_api($api_url . "?username=" . $tmweasy['user'] . "&password=" . $tmweasy['password'] . "&json=1");
     $check_api = json_decode($check_api, true);
     if ($check_api['Status'] != "ready") {
         $_SESSION["alert_content"] = "Error : " . $check_api['Msg'];
