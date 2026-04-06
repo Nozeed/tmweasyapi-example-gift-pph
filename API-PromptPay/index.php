@@ -113,13 +113,6 @@ if ($_POST["amount"]) {
 
 <body>
 	<h1>PromptPay API</h1>
-	<p>หลักการทำงานของ API</p>
-	<p>- Ref1 / Username หรือ ID ตามที่ตั้งค่าใน Config</p>
-	<p>- สร้าง QR ผ่าน API พร้อมเพย์ https://tmwallet.thaighost.net/apiwallet.php</p>
-	<p>- แสดง QR ให้สแกน</p>
-	<p>- รอ callback</p>
-	<p>- ตรวจสอบสถานะ</p>
-	<p>- เติมเงินเมื่อสำเร็จ</p>
 	<?php
 	if ($_GET["action"] == "success") {
 	?>
@@ -180,6 +173,13 @@ if ($_POST["amount"]) {
 				</p>
 				<p><button type="submit">สร้าง QR Payment</button></p>
 			</form>
+				<p>หลักการทำงานของ API</p>
+	            <p>- Ref1 / Username หรือ ID ตามที่ตั้งค่าใน Config</p>
+	            <p>- สร้าง QR ผ่าน API พร้อมเพย์ https://tmwallet.thaighost.net/apiwallet.php</p>
+	            <p>- แสดง QR ให้สแกน</p>
+				<p>- รอ callback</p>
+				<p>- ตรวจสอบสถานะ</p>
+				<p>- เติมเงินเมื่อสำเร็จ</p>
 	<?php
 		}
 	}
