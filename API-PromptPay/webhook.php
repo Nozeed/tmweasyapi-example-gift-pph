@@ -1,4 +1,5 @@
 <?php
+// รับค่าจาก tmweasy api webhook method POST
 header('Content-Type: application/json');
 set_time_limit(0);
 error_reporting(0);
