@@ -82,16 +82,15 @@ if (!empty($_POST['transactionid'])) {
 
         if ($api_respone['Status'] == "check_success") {
             $money_total = $api_respone['Amount'];
-            $point = $money_total;
 
             $ref1 = $_POST['ref1'];
             // Direct PDO prepared statement
             $stmt = $conn->prepare("update $database_table set $database_point_field = $database_point_field + :point where $database_user_field = :ref1");
-            $stmt->bindParam(":point", $point);
+            $stmt->bindParam(":point", $money_total);
             $stmt->bindParam(":ref1", $ref1);
             $stmt->execute();
 
-            $_SESSION["alert_content"] = "จำนวนเงิน คือ " . number_format($money_total) . " บาท ได้รับ  " . number_format($point) . " เครดิตร \n ขอบคุณที่ใช้บริการครับ   [ ปิดหน้านี้ได้เลย! ]";
+            $_SESSION["alert_content"] = "จำนวนเงิน คือ " . number_format($money_total) . " บาท ได้รับ " . number_format($money_total) . " เครดิต \n ขอบคุณที่ใช้บริการครับ   [ ปิดหน้านี้ได้เลย! ]";
             $_SESSION["alert_type"] = "alert-success";
             header("location:index.php");
             die();
