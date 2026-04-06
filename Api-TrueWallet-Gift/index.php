@@ -82,11 +82,7 @@ if (!empty($_POST['transactionid'])) {
 
         if ($api_respone['Status'] == "check_success") {
             $money_total = $api_respone['Amount'];
-            if ($api_respone['Type'] == "truemoney") {
-                $point = $database_set['truemoney'][$money_total];
-            } else {
-                $point = $money_total;
-            }
+            $point = $money_total;
 
             $ref1 = $_POST['ref1'];
             // Direct PDO prepared statement
