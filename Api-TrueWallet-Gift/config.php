@@ -5,7 +5,6 @@ $tmweasy["user"] = ""; //Username ใช้ล็อกอินเว็บ htt
 $tmweasy["password"] = ""; //Password ใช้ล็อกอินเว็บ https://www.tmweasyapi.com/login.php
 $truewallet["mobile"] = ""; //เบอร์ทรูวอเลท ตัวเลขเท่านั้น
 $truewallet["name"] = ""; //ฃื่อบัญชีวอเลท
-$database_set["truewallet"]["mul"] = 1; //ตัวคูณเครดิตรสำหรับทรูวอเลท และซองของขวีญ
 $database_set["host"] = ""; // Host ฐานข้อมูล
 $database_set["user"] = ""; // User ฐานข้อมูล
 $database_set["password"] = ""; // Password ฐานข้อมูล
