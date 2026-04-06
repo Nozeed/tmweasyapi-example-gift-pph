@@ -120,13 +120,6 @@ if (!empty($_POST['transactionid'])) {
 
 <body>
     <h1>TrueWallet Gift API</h1>
-    <p>หลักการทำงานของ API</p>
-    <p>- Ref1 / Username หรือ ID ตามที่ตั้งค่าใน Config</p>
-    <p>- รับ URL ซองของขวัญและส่งเข้า API TrueWallet https://tmwallet.thaighost.net/apiwallet.php</p>
-    <p>- ตรวจสอบข้อมูลรายการจาก API</p>
-    <p>- รอผลการทำรายการ</p>
-    <p>- ตรวจสอบสถานะ</p>
-    <p>- เติมเงินเมื่อสำเร็จ</p>
     <h2>ตรวจสอบเติมเงิน</h2>
     <form method="post">
         <p>
@@ -140,6 +133,13 @@ if (!empty($_POST['transactionid'])) {
         <input type="hidden" name="transactionid" value="truegift">
         <p><button type="submit">ตรวจสอบเติมเงิน</button></p>
     </form>
+    <p>หลักการทำงานของ API</p>
+    <p>- Ref1 / Username หรือ ID ตามที่ตั้งค่าใน Config</p>
+    <p>- รับ URL ซองของขวัญและส่งเข้า API TrueWallet https://tmwallet.thaighost.net/apiwallet.php</p>
+    <p>- ตรวจสอบข้อมูลรายการจาก API</p>
+    <p>- รอผลการทำรายการ</p>
+    <p>- ตรวจสอบสถานะ</p>
+    <p>- เติมเงินเมื่อสำเร็จ</p>
     <?php
     if ($_SESSION['alert_content']) {
         alert_content($_SESSION['alert_content'], $_SESSION['alert_type']);
