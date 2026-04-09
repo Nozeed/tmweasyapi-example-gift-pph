@@ -1,0 +1,69 @@
+ขั้นตอนการทำงาน API : PromptPay QR
+
+**API URL:** https://tmwallet.thaighost.net/api_pph.php
+
+**Config Variables:**
+- $tmweasy_user = "" // Username จาก https://www.tmweasyapi.com/login.php
+- $tmweasy_password = "" // Password จาก https://www.tmweasyapi.com/login.php
+- $tmweasy_api_key = "" // API Key จากการเปิดใช้งาน Qr Promptpay Api
+- $con_id = "" // Con ID จากการเปิดใช้งาน Qr Promptpay Api
+- $prommpay_no = "" // เลข ID พร้อมเพย์ (เบอร์โทร/เลขบัตรปชช เฉพาะตัวเลข)
+- $prommpay_type = "01" // 01 = Mobile, 02 = เลขบัตรปชช, 03 = E-Wallet
+- $prommpay_name = "" // ชื่อและนามสกุลบัญชี
+
+**API Flow (รับ-ส่งข้อมูล):**
+
+**1. สร้างรายการชำระเงิน (create_pay)**
+- Request: GET/POST ไปที่ API
+  - URL: "?username={user}&password={pass}&amount={amount}&ref1={ref1}&con_id={con_id}&ip={ip}&method=create_pay"
+- Response (JSON):
+  ```json
+  {
+    "status": "1",  // "1" = success, "0" = fail
+    "id_pay": "12345",  // ID รายการ
+    "msg": "success message"
+  }
+  ```
+
+**2. ดูรายละเอียดรายการ (detail_pay)**
+- Request: GET ไปที่ API
+  - URL: "?username={user}&password={pass}&con_id={con_id}&id_pay={id_pay}&type={type}&promptpay_id={no}&method=detail_pay"
+- Response (JSON):
+  ```json
+  {
+    "status": "1",
+    "qr_image_base64": "base64_string",  // QR Code
+    "ref1": "user123",
+    "amount_check": 10000,  // ยอดเงิน (สตางค์) = 100.00 บาท
+    "time_out": 600  // เวลาหมดอายุ (วินาที)
+  }
+  ```
+
+**3. ยกเลิกรายการ (cancel)**
+- Request: GET ไปที่ API
+  - URL: "?username={user}&password={pass}&con_id={con_id}&method=cancel&id_pay={id_pay}"
+
+**Webhook Callback Flow (api/webhook-promptpay.php)**
+- รับ: POST request
+- รับค่า:
+  - $_POST["data"]: JSON string เช่น `{"id_pay":"12345","amount":100,"ref1":"user123","timestamp":1234567890}`
+  - $_POST["signature"]: MD5 hash เช่น `md5($data . ":" . $tmweasy_api_key)`
+- Verify:
+  1. Timestamp: `if ((time() - $data_api["timestamp"]) < 30)` // ต้องไม่เกิน 30 วินาที
+  2. Signature: `if (md5($_POST["data"] . ":" . $tmweasy_api_key) == $_POST["signature"])`
+  3. Idempotency: เช็คจากไฟล์ paid_id.txt ว่า id_pay เคยใช้ไปหรือยัง
+- เติมเงิน:
+  ```php
+  UPDATE wallets SET balance = balance + :amount WHERE user_id = :ref1
+  INSERT INTO wallet_transactions (user_id, type, amount, balance_after, description, reference)
+  ```
+- Response (JSON):
+  - Success: `{"status": 1, "msg": "ok"}`
+  - Fail: `{"status": 0, "msg": "error message"}`
+
+**Frontend Flow:**
+1. กรอกจำนวนเงิน → กด "สร้าง QR Payment"
+2. เรียก API create_pay → รับ id_pay → บันทึก DB (status=pending)
+3. เรียก API detail_pay → แสดง QR (จาก qr_image_base64), ยอดเงิน, countdown 10 นาที
+4. Polling ทุก 3 วินาที: เรียก paid.php?id_pay={id_pay} → ถ้า return "ok" = redirect หน้าสำเร็จ
+5. หมดเวลา → แสดงปุ่ม "ยกเลิก" → เรียก API cancel
