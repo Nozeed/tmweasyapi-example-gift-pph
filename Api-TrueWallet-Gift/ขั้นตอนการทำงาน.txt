@@ -1,0 +1,56 @@
+ขั้นตอนการทำงาน API : TrueWallet Gift
+
+**API URL:** https://tmwallet.thaighost.net/apiwallet.php
+
+**Config Variables:**
+- $tmweasy["user"] = "" // Username จาก https://www.tmweasyapi.com/login.php
+- $tmweasy["password"] = "" // Password จาก https://www.tmweasyapi.com/login.php
+- $truewallet["mobile"] = "" // เบอร์ทรูวอเลท (ตัวเลขเท่านั้น)
+- $truewallet["name"] = "" // ชื่อบัญชีทรูวอเลท
+
+**API Flow (รับ-ส่งข้อมูล):**
+
+**1. ตรวจสอบสถานะ API (check)**
+- Request: GET ไปที่ API
+  - URL: "?username={user}&password={pass}&json=1"
+- Response (JSON):
+  ```json
+  {
+    "Status": "ready",  // "ready" = พร้อมใช้งาน
+    "Msg": "API is ready"
+  }
+  ```
+
+**2. ตรวจสอบซองของขวัญ (check gift)**
+- Request: GET/POST ไปที่ API
+  - URL: "?username={user}&password={pass}&tmemail={mobile}&transactionid={gift_url}&clientip={ip}&ref1={ref1}&action=yes&json=1"
+  - Parameters:
+    - username: tmweasy username
+    - password: tmweasy password
+    - tmemail: เบอร์ทรูวอเลท
+    - transactionid: URL ซองของขวัญ (เช่น https://gift.truemoney.com/voucher/...)
+    - clientip: IP address ของผู้ใช้
+    - ref1: อ้างอิง user/ID
+    - action: "yes"
+    - json: "1"
+- Response (JSON):
+  ```json
+  {
+    "Status": "check_success",  // "check_success" = สำเร็จ
+    "Amount": 100.00,  // ยอดเงิน (บาท)
+    "Msg": "success message"
+  }
+  ```
+
+**Frontend Flow:**
+1. กรอก Ref1 / User ID และ URL ซองของขวัญ
+2. Validate: URL ต้องมี "ttp" (strpos check)
+3. Check duplicate: ตรวจสอบว่า URL นี้เคยใช้ไปหรือยัง (จาก database)
+4. เรียก API check gift
+5. Success:
+   - เติมเงินเข้า wallet: `UPDATE wallets SET balance = balance + :amount WHERE user_id = :ref1`
+   - บันทึก transaction
+   - แสดงข้อความสำเร็จ
+6. Fail:
+   - แสดง error message จาก API ($api_respone['Msg'])
+   - Log error
