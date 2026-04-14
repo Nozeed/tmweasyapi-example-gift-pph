@@ -1,5 +1,5 @@
 <?php
-$api_url = "https://tmwallet.thaighost.net/api_pph.php";
+$api_url = "https://www.tmweasy.com/api_pph.php"; //หรือสำรอง https://tmwallet.thaighost.net/api_pph.php
 $tmweasy_user = ""; //Username ใช้ล็อกอินเว็บ https://www.tmweasyapi.com/login.php
 $tmweasy_password = ""; //Password ใช้ล็อกอินเว็บ https://www.tmweasyapi.com/login.php
 $tmweasy_api_key = ""; //api key ที่ได้จากการเปิดใช้งาน Qr Promptpay Api บนเว็บ  tmweasy
