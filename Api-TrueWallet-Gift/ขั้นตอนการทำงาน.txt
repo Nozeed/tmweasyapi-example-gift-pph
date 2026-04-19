@@ -1,56 +1,168 @@
-ขั้นตอนการทำงาน API : TrueWallet Gift
+========================================
+    ขั้นตอนการทำงาน API : TrueWallet Gift
+========================================
 
 **API URL:** https://tmwallet.thaighost.net/apiwallet.php
 
-**Config Variables:**
-- $tmweasy["user"] = "" // Username จาก https://www.tmweasyapi.com/login.php
-- $tmweasy["password"] = "" // Password จาก https://www.tmweasyapi.com/login.php
-- $truewallet["mobile"] = "" // เบอร์ทรูวอเลท (ตัวเลขเท่านั้น)
-- $truewallet["name"] = "" // ชื่อบัญชีทรูวอเลท
+========================================
+              CONFIGURATION
+========================================
 
-**API Flow (รับ-ส่งข้อมูล):**
+**ไฟล์ config.php:**
+```php
+$api_url = "https://tmwallet.thaighost.net/apiwallet.php";  // URL API
+$tmweasy["user"] = "";        // Username TMW Easy API
+$tmweasy["password"] = "";    // Password TMW Easy API
+$truewallet["mobile"] = "";   // เบอร์ทรูวอเลท (ตัวเลขเท่านั้น)
+$truewallet["name"] = "";     // ชื่อบัญชีทรูวอเลท
+$database_set["host"] = "";       // Host ฐานข้อมูล
+$database_set["user"] = "";       // User ฐานข้อมูล
+$database_set["password"] = "";   // Password ฐานข้อมูล
+$database_set["db_name"] = "";    // ชื่อฐานข้อมูล
+$database_set["user_table"] = ""; // ชื่อตารางผู้ใช้
+$database_set["user_field"] = ""; // ชื่อฟิลด์ชื่อผู้ใช้
+$database_set["point_field"] = ""; // ชื่อฟิลด์เครดิต
+```
 
-**1. ตรวจสอบสถานะ API (check)**
-- Request: GET ไปที่ API
-  - URL: "?username={user}&password={pass}&json=1"
+========================================
+            API ENDPOINTS
+========================================
+
+**1. ตรวจสอบสถานะ API**
+- Method: GET
+- URL: `?username={user}&password={pass}&json=1`
 - Response (JSON):
   ```json
   {
-    "Status": "ready",  // "ready" = พร้อมใช้งาน
+    "Status": "ready",      // "ready" = พร้อมใช้งาน, "busy" = ไม่พร้อม
     "Msg": "API is ready"
   }
   ```
 
-**2. ตรวจสอบซองของขวัญ (check gift)**
-- Request: GET/POST ไปที่ API
-  - URL: "?username={user}&password={pass}&tmemail={mobile}&transactionid={gift_url}&clientip={ip}&ref1={ref1}&action=yes&json=1"
-  - Parameters:
-    - username: tmweasy username
-    - password: tmweasy password
-    - tmemail: เบอร์ทรูวอเลท
-    - transactionid: URL ซองของขวัญ (เช่น https://gift.truemoney.com/voucher/...)
-    - clientip: IP address ของผู้ใช้
-    - ref1: อ้างอิง user/ID
-    - action: "yes"
-    - json: "1"
-- Response (JSON):
+**2. ตรวจสอบและเติมซองของขวัญ**
+- Method: GET/POST
+- URL: `?username={user}&password={pass}&tmemail={mobile}&transactionid={gift_url}&clientip={ip}&ref1={ref1}&action=yes&json=1`
+- Parameters:
+  | Parameter   | คำอธิบาย                                  |
+  |-------------|-------------------------------------------|
+  | username    | TMW Easy API Username                     |
+  | password    | TMW Easy API Password                     |
+  | tmemail     | เบอร์ทรูวอเลท (ตัวเลขเท่านั้น)          |
+  | transactionid | URL ซองของขวัญ (เช่น https://gift.truemoney.com/...) |
+  | clientip    | IP Address ผู้ใช้ (urlencode)             |
+  | ref1        | รหัสอ้างอิง user/ID                       |
+  | action      | "yes" (ค่าคงที่)                          |
+  | json        | "1" (ค่าคงที่)                            |
+
+- Response Success:
   ```json
   {
-    "Status": "check_success",  // "check_success" = สำเร็จ
-    "Amount": 100.00,  // ยอดเงิน (บาท)
-    "Msg": "success message"
+    "Status": "check_success",
+    "Amount": 100.00,
+    "Msg": "SUCCESS"
   }
   ```
 
-**Frontend Flow:**
-1. กรอก Ref1 / User ID และ URL ซองของขวัญ
-2. Validate: URL ต้องมี "ttp" (strpos check)
-3. Check duplicate: ตรวจสอบว่า URL นี้เคยใช้ไปหรือยัง (จาก database)
-4. เรียก API check gift
-5. Success:
-   - เติมเงินเข้า wallet: `UPDATE wallets SET balance = balance + :amount WHERE user_id = :ref1`
-   - บันทึก transaction
-   - แสดงข้อความสำเร็จ
-6. Fail:
-   - แสดง error message จาก API ($api_respone['Msg'])
-   - Log error
+- Response Fail:
+  ```json
+  {
+    "Status": "fail",
+    "Amount": 0,
+    "Msg": "error message"
+  }
+  ```
+
+========================================
+           FRONTEND FLOW
+========================================
+
+**ไฟล์:** index.php
+
+**ขั้นตอนการทำงาน:**
+
+1. **โหลดหน้า (Initial Load)**
+   - ตรวจสอบสถานะ API: `?username={user}&password={pass}&json=1`
+   - ถ้า Status != "ready" → แสดง error
+
+2. **ผู้ใช้กรอกข้อมูล**
+   - Ref1 / User ID (input name="ref1")
+   - URL ซองของขวัญ (input name="gifturl")
+   - Hidden field: `transactionid=truegift`
+
+3. **Validation**
+   ```php
+   if ($_POST["transactionid"] == "truegift") {
+       if (strpos($_POST["gifturl"], "ttp")) {
+           // URL ถูกต้อง
+       } else {
+           // Error: URL ไม่ถูกต้อง
+       }
+   }
+   ```
+
+4. **เรียก API**
+   ```php
+   $api_url = "https://tmwallet.thaighost.net/apiwallet.php";
+   $send_api = connect_api($api_url . "?username=" . $tmweasy['user'] 
+               . "&password=" . $tmweasy['password'] 
+               . "&tmemail=" . $truewallet["mobile"] 
+               . "&transactionid=" . $tran_id 
+               . "&clientip=" . urlencode(my_ip()) 
+               . "&ref1=" . $_POST['ref1'] 
+               . "&action=yes&json=1");
+   $api_respone = json_decode($send_api, true);
+   ```
+
+5. **ตรวจสอบผลลัพธ์**
+   ```php
+   if ($api_respone['Status'] == "check_success") {
+       $money_total = $api_respone['Amount'];
+       // อัปเดตเครดิตผู้ใช้
+   } else {
+       // แสดง error: $api_respone['Msg']
+   }
+   ```
+
+6. **อัปเดตฐานข้อมูล (เมื่อสำเร็จ)**
+   ```php
+   $stmt = $conn->prepare("UPDATE $database_table 
+                          SET $database_point_field = $database_point_field + :point 
+                          WHERE $database_user_field = :ref1");
+   $stmt->bindParam(":point", $money_total);
+   $stmt->bindParam(":ref1", $ref1);
+   $stmt->execute();
+   ```
+
+========================================
+         DATABASE STRUCTURE
+========================================
+
+**ตารางที่ต้องมี:**
+- ตารางผู้ใช้ (ตาม config $database_set["user_table"])
+  - ฟิลด์ user (ตาม config $database_set["user_field"])
+  - ฟิลด์ point/credit (ตาม config $database_set["point_field"])
+
+========================================
+           ERROR MESSAGES
+========================================
+
+**สถานะที่เป็นไปได้:**
+- "ready" - API พร้อมใช้งาน
+- "busy" - API ไม่พร้อมใช้งาน
+- "check_success" - ซองถูกต้องและเติมสำเร็จ
+- "fail" - เกิดข้อผิดพลาด (ดู Msg ประกอบ)
+
+**ข้อผิดพลาดทั่วไป:**
+- URL ไม่ถูกต้อง (ต้องมี "ttp")
+- ซองของขวัญถูกใช้ไปแล้ว
+- ซองของขวัญหมดอายุ
+- API busy
+- Database connection error
+
+========================================
+              FILES
+========================================
+
+- `config.php` - การตั้งค่าระบบ
+- `index.php` - หน้าเว็บหลัก (frontend + processing)
+- `ขั้นตอนการทำงาน.txt` - เอกสารนี้
