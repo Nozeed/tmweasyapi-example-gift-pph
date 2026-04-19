@@ -18,7 +18,7 @@ $database_check = array(
 
 // Direct PDO connection
 try {
-	$conn = new PDO("mysql:host=$database_host;dbname=$database_db_name;charset=utf8mb4", $database_user, $database_password);
+	$conn = new PDO("mysql:host={$database_set["host"]};dbname={$database_set["db_name"]};charset=utf8mb4", $database_set["user"], $database_set["password"]);
 	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
 	die("Error PDO Database is not connect: " . $e->getMessage());
@@ -26,7 +26,7 @@ try {
 
 
 if ($_GET["action"] == "cancel") {
-	$connect_api = connect_api($api_url . "?username=$tmweasy_user&password=$tmweasy_password&con_id=$con_id&method=cancel&id_pay=" . $_SESSION["id_pay"]);
+	$connect_api = connect_api($api_url . "?username={$tmweasy["user"]}&password={$tmweasy["password"]}&con_id={$promptpay["con_id"]}&method=cancel&id_pay=" . $_SESSION["id_pay"]);
 	$_SESSION["id_pay"] = "";
 	header("location:index.php");
 	die();
@@ -39,7 +39,7 @@ if ($_GET["action"] == "exit") {
 
 
 if ($_POST["amount"]) {
-	$connect_api = connect_api($api_url . "?username=$tmweasy_user&password=$tmweasy_password&amount=" . $_POST["amount"] . "&ref1=" . $_POST["ref1"] . "&con_id=$con_id&ip=" . my_ip() . "&method=create_pay");
+	$connect_api = connect_api($api_url . "?username={$tmweasy["user"]}&password={$tmweasy["password"]}&amount=" . $_POST["amount"] . "&ref1=" . $_POST["ref1"] . "&con_id={$promptpay["con_id"]}&ip=" . my_ip() . "&method=create_pay");
 	$connect_api = json_decode($connect_api, true);
 	if ($connect_api["status"] != "1") {
 
@@ -122,7 +122,7 @@ if ($_POST["amount"]) {
 		<?php
 	} else {
 		if ($_SESSION["id_pay"]) {
-			$connect_api = connect_api($api_url . "?username=$tmweasy_user&password=$tmweasy_password&con_id=$con_id&id_pay=" . $_SESSION["id_pay"] . "&type=$prommpay_type&promptpay_id=$prommpay_no&method=detail_pay");
+			$connect_api = connect_api($api_url . "?username={$tmweasy["user"]}&password={$tmweasy["password"]}&con_id={$promptpay["con_id"]}&id_pay=" . $_SESSION["id_pay"] . "&type={$promptpay["type"]}&promptpay_id={$promptpay["no"]}&method=detail_pay");
 			$connect_api = json_decode($connect_api, true);
 			if ($connect_api["status"] != "1") {
 				$_SESSION["id_pay"] = "";
@@ -136,9 +136,9 @@ if ($_POST["amount"]) {
 		?>
 			<h2>รายละเอียดรายการชำระ</h2>
 			<p><strong>Ref1:</strong> <?= $connect_api["ref1"] ?></p>
-			<p><strong>เลขพร้อมเพย์:</strong> <?= $prommpay_no ?></p>
-			<p><strong>ประเภท:</strong> <?= $prompay_type[$prommpay_type] ?></p>
-			<p><strong>ชื่อบัญชี:</strong> <?= $prommpay_name ?></p>
+			<p><strong>เลขพร้อมเพย์:</strong> <?= $promptpay["no"] ?></p>
+			<p><strong>ประเภท:</strong> <?= $prompay_type[$promptpay["type"]] ?></p>
+			<p><strong>ชื่อบัญชี:</strong> <?= $promptpay["name"] ?></p>
 			<p><strong>ยอดที่ต้องโอน:</strong> <?= number_format($connect_api["amount_check"] / 100, 2) ?> บาท</p>
 			<p><strong>หมายเหตุ:</strong> โอนให้ตรงยอดที่ระบบแสดงเท่านั้น</p>
 			<p><img src="<?= $qr_url ?>" alt="PromptPay QR" style="max-width:320px;width:100%;"></p>
@@ -154,7 +154,7 @@ if ($_POST["amount"]) {
 			</script>
 		<?php
 		} else {
-			$connect_api = connect_api($api_url . "?username=$tmweasy_user&password=$tmweasy_password&con_id=$con_id");
+			$connect_api = connect_api($api_url . "?username={$tmweasy["user"]}&password={$tmweasy["password"]}&con_id={$promptpay["con_id"]}");
 			$connect_api = json_decode($connect_api, true);
 			if ($connect_api["status"] != "1") {
 				$_SESSION["alert_content"] = "Error : " . $connect_api["msg"];
