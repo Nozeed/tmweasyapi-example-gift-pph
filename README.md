@@ -17,14 +17,6 @@
 - มีตัวอย่างโค้ดที่พร้อมรันในแต่ละโฟลเดอร์
 - แยกโค้ดชัดเจนระหว่าง TrueWallet Gift และ PromptPay
 
----
-
-## โครงสร้างโฟลเดอร์
-├── Api-TrueWallet-Gift/     ← ตัวอย่าง TrueWallet Gift API
-├── API-PromptPay/           ← ตัวอย่าง PromptPay Webhook + API
-
----
-
 ## รูปแบบการทำงานของทั้ง 2 API
 
 ### 1. TrueWallet Gift API (โฟลเดอร์: `Api-TrueWallet-Gift`)
