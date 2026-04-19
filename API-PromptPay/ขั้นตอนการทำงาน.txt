@@ -1,38 +1,97 @@
-ขั้นตอนการทำงาน API : PromptPay QR
+========================================
+    ขั้นตอนการทำงาน API : PromptPay QR
+========================================
 
 **API URL:** https://tmwallet.thaighost.net/api_pph.php
 
-**Config Variables:**
-- $tmweasy_user = "" // Username จาก https://www.tmweasyapi.com/login.php
-- $tmweasy_password = "" // Password จาก https://www.tmweasyapi.com/login.php
-- $tmweasy_api_key = "" // API Key จากการเปิดใช้งาน Qr Promptpay Api
-- $con_id = "" // Con ID จากการเปิดใช้งาน Qr Promptpay Api
-- $prommpay_no = "" // เลข ID พร้อมเพย์ (เบอร์โทร/เลขบัตรปชช เฉพาะตัวเลข)
-- $prommpay_type = "01" // 01 = Mobile, 02 = เลขบัตรปชช, 03 = E-Wallet
-- $prommpay_name = "" // ชื่อและนามสกุลบัญชี
+========================================
+              CONFIGURATION
+========================================
 
-**API Flow (รับ-ส่งข้อมูล):**
+**ไฟล์ config.php:**
+```php
+$api_url = "https://tmwallet.thaighost.net/api_pph.php";  // URL API
+
+// TMW Easy API Credentials
+$tmweasy["user"] = "";        // Username TMW Easy API
+$tmweasy["password"] = "";    // Password TMW Easy API
+$tmweasy["api_key"] = "";     // API Key จากการเปิดใช้งาน Qr Promptpay Api
+
+// PromptPay Settings
+$promptpay["con_id"] = "";    // Con ID จากการเปิดใช้งาน Qr Promptpay Api
+$promptpay["no"] = "";        // เลข ID พร้อมเพย์ (เบอร์โทร/เลขบัตรปชช เฉพาะตัวเลข)
+$promptpay["type"] = "01";    // 01 = Mobile, 02 = เลขบัตรปชช, 03 = E-Wallet
+$promptpay["name"] = "";      // ชื่อและนามสกุลบัญชี
+
+// Database Settings
+$database_set["host"] = "localhost";    // Host ฐานข้อมูล
+$database_set["user"] = "root";         // User ฐานข้อมูล
+$database_set["password"] = "";       // Password ฐานข้อมูล
+$database_set["db_name"] = "";        // ชื่อฐานข้อมูล
+$database_set["table"] = "";          // ชื่อตารางผู้ใช้
+$database_set["user_field"] = "";     // ชื่อฟิลด์ชื่อผู้ใช้
+$database_set["point_field"] = "";    // ชื่อฟิลด์เครดิต
+```
+
+**ประเภท PromptPay:**
+- "01" = เบอร์มือถือ (Mobile)
+- "02" = เลขบัตรประชาชน (National ID)
+- "03" = E-Wallet
+
+========================================
+            API ENDPOINTS
+========================================
 
 **1. สร้างรายการชำระเงิน (create_pay)**
-- Request: GET/POST ไปที่ API
-  - URL: "?username={user}&password={pass}&amount={amount}&ref1={ref1}&con_id={con_id}&ip={ip}&method=create_pay"
-- Response (JSON):
+- Method: GET/POST
+- URL: `?username={user}&password={pass}&amount={amount}&ref1={ref1}&con_id={con_id}&ip={ip}&method=create_pay`
+- Parameters:
+  | Parameter | คำอธิบาย |
+  |-----------|---------|
+  | username  | TMW Easy API Username |
+  | password  | TMW Easy API Password |
+  | amount    | จำนวนเงิน (บาท) |
+  | ref1      | รหัสอ้างอิง user/ID |
+  | con_id    | Connection ID |
+  | ip        | IP Address ผู้ใช้ |
+  | method    | "create_pay" |
+
+- Response Success:
   ```json
   {
-    "status": "1",  // "1" = success, "0" = fail
-    "id_pay": "12345",  // ID รายการ
+    "status": "1",
+    "id_pay": "12345",
     "msg": "success message"
   }
   ```
 
+- Response Fail:
+  ```json
+  {
+    "status": "0",
+    "msg": "error message"
+  }
+  ```
+
 **2. ดูรายละเอียดรายการ (detail_pay)**
-- Request: GET ไปที่ API
-  - URL: "?username={user}&password={pass}&con_id={con_id}&id_pay={id_pay}&type={type}&promptpay_id={no}&method=detail_pay"
-- Response (JSON):
+- Method: GET
+- URL: `?username={user}&password={pass}&con_id={con_id}&id_pay={id_pay}&type={type}&promptpay_id={no}&method=detail_pay`
+- Parameters:
+  | Parameter   | คำอธิบาย |
+  |-------------|---------|
+  | username    | TMW Easy API Username |
+  | password    | TMW Easy API Password |
+  | con_id      | Connection ID |
+  | id_pay      | ID รายการจาก create_pay |
+  | type        | PromptPay type (01/02/03) |
+  | promptpay_id | เลข PromptPay |
+  | method      | "detail_pay" |
+
+- Response Success:
   ```json
   {
     "status": "1",
-    "qr_image_base64": "base64_string",  // QR Code
+    "qr_image_base64": "iVBORw0KGgoAAAANS...",  // QR Code Base64
     "ref1": "user123",
     "amount_check": 10000,  // ยอดเงิน (สตางค์) = 100.00 บาท
     "time_out": 600  // เวลาหมดอายุ (วินาที)
@@ -40,30 +99,211 @@
   ```
 
 **3. ยกเลิกรายการ (cancel)**
-- Request: GET ไปที่ API
-  - URL: "?username={user}&password={pass}&con_id={con_id}&method=cancel&id_pay={id_pay}"
+- Method: GET
+- URL: `?username={user}&password={pass}&con_id={con_id}&method=cancel&id_pay={id_pay}`
+- Parameters:
+  | Parameter | คำอธิบาย |
+  |-----------|---------|
+  | username  | TMW Easy API Username |
+  | password  | TMW Easy API Password |
+  | con_id    | Connection ID |
+  | id_pay    | ID รายการ |
+  | method    | "cancel" |
 
-**Webhook Callback Flow (api/webhook-promptpay.php)**
-- รับ: POST request
-- รับค่า:
-  - $_POST["data"]: JSON string เช่น `{"id_pay":"12345","amount":100,"ref1":"user123","timestamp":1234567890}`
-  - $_POST["signature"]: MD5 hash เช่น `md5($data . ":" . $tmweasy_api_key)`
-- Verify:
-  1. Timestamp: `if ((time() - $data_api["timestamp"]) < 30)` // ต้องไม่เกิน 30 วินาที
-  2. Signature: `if (md5($_POST["data"] . ":" . $tmweasy_api_key) == $_POST["signature"])`
-  3. Idempotency: เช็คจากไฟล์ paid_id.txt ว่า id_pay เคยใช้ไปหรือยัง
-- เติมเงิน:
-  ```php
-  UPDATE wallets SET balance = balance + :amount WHERE user_id = :ref1
-  INSERT INTO wallet_transactions (user_id, type, amount, balance_after, description, reference)
-  ```
-- Response (JSON):
-  - Success: `{"status": 1, "msg": "ok"}`
-  - Fail: `{"status": 0, "msg": "error message"}`
+========================================
+           WEBHOOK FLOW
+========================================
 
-**Frontend Flow:**
-1. กรอกจำนวนเงิน → กด "สร้าง QR Payment"
-2. เรียก API create_pay → รับ id_pay → บันทึก DB (status=pending)
-3. เรียก API detail_pay → แสดง QR (จาก qr_image_base64), ยอดเงิน, countdown 10 นาที
-4. Polling ทุก 3 วินาที: เรียก paid.php?id_pay={id_pay} → ถ้า return "ok" = redirect หน้าสำเร็จ
-5. หมดเวลา → แสดงปุ่ม "ยกเลิก" → เรียก API cancel
+**ไฟล์:** webhook.php
+
+**รับข้อมูลจาก TMW Easy API:**
+- Method: POST
+- Content-Type: application/json
+
+**รับค่า:**
+| ตัวแปร | คำอธิบาย |
+|--------|---------|
+| $_POST["data"] | JSON string ข้อมูลรายการ |
+| $_POST["signature"] | MD5 hash สำหรับตรวจสอบความถูกต้อง |
+
+**ตัวอย่าง $_POST["data"]:**
+```json
+{
+  "id_pay": "12345",
+  "amount": 100,
+  "ref1": "user123",
+  "timestamp": 1234567890
+}
+```
+
+**ตัวอย่าง Signature:**
+```php
+$signature = md5($_POST["data"] . ":" . $tmweasy["api_key"]);
+// ต้องตรงกับ $_POST["signature"]
+```
+
+**ขั้นตอนการ Verify:**
+```php
+$data_api = json_decode($_POST["data"], true);
+$ts = time();
+
+// 1. ตรวจสอบ Timestamp (ต้องไม่เกิน 30 วินาที)
+if (($ts - $data_api["timestamp"]) < 30) {
+    
+    // 2. ตรวจสอบ Signature
+    $signature = md5($_POST["data"] . ":" . $tmweasy["api_key"]);
+    if ($signature == $_POST["signature"]) {
+        
+        // 3. ตรวจสอบ Idempotency (ไม่ให้เติมซ้ำ)
+        $paid_ids = file("paid_id.txt");
+        if (!in_array($data_api["id_pay"], $paid_ids)) {
+            // ดำเนินการเติมเงิน
+        }
+    }
+}
+```
+
+**อัปเดตฐานข้อมูลเมื่อชำระสำเร็จ:**
+```php
+$point = $data_api["amount"];
+$ref1 = $data_api["ref1"];
+
+$stmt = $conn->prepare("UPDATE {$database_set["table"]} 
+                       SET {$database_set["point_field"]} = {$database_set["point_field"]} + :point 
+                       WHERE {$database_set["user_field"]} = :ref1");
+$stmt->bindParam(":point", $point);
+$stmt->bindParam(":ref1", $ref1);
+$stmt->execute();
+```
+
+**บันทึก id_pay ป้องกันการเติมซ้ำ:**
+```php
+file_put_contents("paid_id.txt", $data_api["id_pay"] . "\n", FILE_APPEND);
+```
+
+**Response กลับไปยัง API:**
+```php
+// Success
+{"status": 1, "msg": "ok"}
+
+// Fail
+{"status": 0, "msg": "error message"}
+```
+
+========================================
+           FRONTEND FLOW
+========================================
+
+**ไฟล์:** index.php
+
+**ขั้นตอนการทำงาน:**
+
+1. **โหลดหน้า (Initial Load)**
+   - ตรวจสอบการเชื่อมต่อ TMW Easy API
+   - URL: `?username={$tmweasy["user"]}&password={$tmweasy["password"]}&con_id={$promptpay["con_id"]}`
+
+2. **ผู้ใช้กรอกข้อมูล**
+   - Ref1 / User ID (input name="ref1")
+   - จำนวนเงิน (input name="amount")
+
+3. **สร้างรายการ (Submit Form)**
+   ```php
+   $connect_api = connect_api($api_url . "?username={$tmweasy["user"]}"
+               . "&password={$tmweasy["password"]}"
+               . "&amount=" . $_POST["amount"]
+               . "&ref1=" . $_POST["ref1"]
+               . "&con_id={$promptpay["con_id"]}"
+               . "&ip=" . my_ip()
+               . "&method=create_pay");
+   $response = json_decode($connect_api, true);
+   ```
+
+4. **บันทึก Session**
+   ```php
+   if ($response["status"] == "1") {
+       $_SESSION["id_pay"] = $response["id_pay"];
+   }
+   ```
+
+5. **แสดง QR Code (มีรายการค้างอยู่)**
+   ```php
+   if ($_SESSION["id_pay"]) {
+       $connect_api = connect_api($api_url 
+           . "?username={$tmweasy["user"]}"
+           . "&password={$tmweasy["password"]}"
+           . "&con_id={$promptpay["con_id"]}"
+           . "&id_pay=" . $_SESSION["id_pay"]
+           . "&type={$promptpay["type"]}"
+           . "&promptpay_id={$promptpay["no"]}"
+           . "&method=detail_pay");
+       $response = json_decode($connect_api, true);
+       
+       // แสดง QR: data:image/png;base64,{qr_image_base64}
+       // แสดงยอด: number_format(amount_check / 100, 2)
+       // Countdown: time_out วินาที
+   }
+   ```
+
+6. **Polling ตรวจสอบการชำระ**
+   - เรียก `paid.php?id_pay={id_pay}` ทุก 3 วินาที
+   - ถ้า return "ok" → redirect หน้าสำเร็จ
+   - JavaScript: `startPaymentCheck()`
+
+7. **ยกเลิกรายการ**
+   - URL: `?action=cancel`
+   ```php
+   if ($_GET["action"] == "cancel") {
+       $connect_api = connect_api($api_url 
+           . "?username={$tmweasy["user"]}"
+           . "&password={$tmweasy["password"]}"
+           . "&con_id={$promptpay["con_id"]}"
+           . "&method=cancel"
+           . "&id_pay=" . $_SESSION["id_pay"]);
+       $_SESSION["id_pay"] = "";
+   }
+   ```
+
+8. **ออกจากหน้า**
+   - URL: `?action=exit`
+   - เคลียร์ `$_SESSION["id_pay"]`
+
+========================================
+         DATABASE STRUCTURE
+========================================
+
+**ตารางที่ต้องมี:**
+- ตารางผู้ใช้ (ตาม config $database_set["table"])
+  - ฟิลด์ user (ตาม config $database_set["user_field"])
+  - ฟิลด์ point/credit (ตาม config $database_set["point_field"])
+
+**ไฟล์สำหรับเก็บข้อมูล:**
+- `paid_id.txt` - รายการ id_pay ที่เติมแล้ว (ป้องกันการเติมซ้ำ)
+- `dateclear.txt` - วันที่ล้างไฟล์ paid_id.txt (ล้างทุกวัน)
+
+========================================
+           ERROR MESSAGES
+========================================
+
+**สถานะที่เป็นไปได้:**
+- "1" = Success
+- "0" = Fail (ดู msg ประกอบ)
+
+**ข้อผิดพลาดทั่วไป:**
+- API Key ไม่ถูกต้อง → Signature verify fail
+- Timestamp เกิน 30 วินาที → Request expired
+- id_pay ซ้ำ → Already processed
+- Database connection error
+- Session timeout
+- QR Code หมดอายุ (time_out)
+
+========================================
+              FILES
+========================================
+
+- `config.php` - การตั้งค่าระบบ
+- `index.php` - หน้าเว็บหลัก (frontend)
+- `webhook.php` - รับ callback จาก TMW Easy API
+- `function.php` - ฟังก์ชัน helper (connect_api, my_ip)
+- `paid.php` - ตรวจสอบสถานะการชำระ (สำหรับ polling)
+- `qr.php` - สร้าง QR Code (ถ้ามี)
+- `ขั้นตอนการทำงาน.txt` - เอกสารนี้
